@@ -25,18 +25,17 @@ generateResetToken();
 
 const app = express();
 
-
-app.use(express.json());
-
-app.use(morgan('dev')); // Log requests to the console
-
 // CORS middleware before serving static files
 app.use(cors({
-    origin: 'http://localhost:3000', // Replace with your frontend URL
+    origin: 'https://music-edu.vercel.app', //frontend URL(http://localhost:3000)
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,  // Allow credentials (cookies)
 }));
+
+app.use(express.json());
+app.use(morgan('dev')); // Log requests to the console
+
 
 // Static folder for serving files (uploaded images, videos, and audio)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -54,7 +53,6 @@ app.use('/api/categories', authenticateToken,  categoryRoutes); // admins and us
 app.use('/api/instruments', authenticateToken, instrumentRoutes); // Accessible by both users and admins
 app.use('/api', categoryRoutes);
 app.use('/api', instrumentRoutes);
-
 app.use('/api/feedback', feedbacksRoutes);
 app.use('/api/security-logs', securityLogsRoutes);
 
