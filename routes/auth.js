@@ -6,7 +6,6 @@ const { body, validationResult } = require('express-validator');
 const nodemailer = require('nodemailer');
 const router = express.Router();
 require('dotenv').config();
-const crypto = require('crypto'); // Import missing crypto module
 
 // Middleware for input validation
 const validateInput = [
@@ -35,11 +34,6 @@ const validateInput = [
         next();
     }
 ];
-
-// Utility function to find user by email or username
-const findUserByIdentifier = async (identifier) => {
-    return await User.findOne({ $or: [{ email: identifier }, { username: identifier }] });
-};
 
 // Sign Up Route
 router.post('/signup', async (req, res) => {
@@ -80,7 +74,7 @@ router.post('/login', validateInput, async (req, res) => {
 
     try {
         // Find user by email or username
-        const user = await findUserByIdentifier(identifier); // Use utility function
+        const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] });
         if (!user) {
             return res.status(400).json({ msg: 'User not found' });
         }
@@ -126,18 +120,13 @@ router.post('/forgot-password', async (req, res) => {
     const { identifier } = req.body;
 
     try {
-        const user = await findUserByIdentifier(identifier); // Use utility function
+        const user = await User.findOne({ $or: [{ email: identifier }, { username: identifier }] });
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        // Generate reset token and expiration
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-        user.resetPasswordToken = hashedToken;
-        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-        await user.save();
-
+        // Generate reset token
+        const resetToken = jwt.sign({ userId: user._id }, process.env.RESET_TOKEN_SECRET, { expiresIn: '1h' });
         const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
 
         // Send reset email
@@ -148,7 +137,7 @@ router.post('/forgot-password', async (req, res) => {
             text: `To reset your password, click on this link: ${resetLink}`,
         });
 
-        res.json({ msg: 'Password reset email sent successfully' });
+        res.json({ msg: 'Password reset email sent succesfully' });
     } catch (error) {
         console.error("Error in forgot password:", error);
         res.status(500).json({ msg: 'Failed to send reset instructions. Please try again.' });
