@@ -32,7 +32,7 @@ app.use(morgan('dev')); // Log requests to the console
 
 // CORS middleware before serving static files
 app.use(cors({
-    origin: 'http://localhost:3000', // Replace with your frontend URL
+    origin: 'https://music-edu.vercel.app/', // Replace with your frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,  // Allow credentials (cookies)
