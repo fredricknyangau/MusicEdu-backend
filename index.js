@@ -7,17 +7,13 @@ const cors = require('cors'); // CORS middleware
 const path = require('path'); 
 const helmet = require('helmet'); // Security middleware
 require('dotenv').config();
-
 const authRoutes = require('./routes/auth');
 const protectedRoutes = require('./routes/protectedRoutes');
 const usersRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categoryRoutes');
 const instrumentRoutes = require('./routes/instrumentRoutes');
-
 const { authenticateToken, authorizeAdmin, authorizeUser } = require('./middleware/authMiddleware');
-
 const feedbacksRoutes = require('./routes/feedbackRoutes');
-
 const securityLogsRoutes = require('./routes/securityLogs');
 
 generateJWTSecret(); // Generate JWT_SECRET if not present
@@ -35,18 +31,13 @@ app.use(cors({
 
 app.use(express.json());
 app.use(morgan('dev')); // Log requests to the console
-
-
-// Static folder for serving files (uploaded images, videos, and audio)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));// Static folder for serving files (uploaded images, videos, and audio)
 app.use(helmet()); // Use Helmet for security
 
 connectDB();
 
 //Routes
-app.use('/api/auth', authRoutes);
-// Apply authentication middleware to protected routes
+app.use('/api/auth', authRoutes);// Apply authentication middleware to protected routes
 app.use('/api/users', usersRoutes);
 app.use('/api', authenticateToken, protectedRoutes);
 app.use('/api/categories', authenticateToken,  categoryRoutes); // admins and users can access categories
