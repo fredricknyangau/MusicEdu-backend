@@ -25,11 +25,14 @@ const app = express();
 
 // CORS Configuration
 app.use(cors({
-    origin: 'https://music-edu.vercel.app',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: ['https://music-edu.vercel.app', 'https://music-edu-backend.vercel.app'], // Allow multiple origins if needed
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Include OPTIONS for preflight requests
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
 }));
+
+// Add middleware to handle preflight requests
+app.options('*', cors());
 
 app.use(express.json());
 app.use(morgan('dev'));
