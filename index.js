@@ -27,14 +27,15 @@ generateResetToken();
 
 // Middleware
 app.use(cors({
-    origin: 'https://music-edu.vercel.app', //frontend URL(http://localhost:3000)
+    origin: 'https://music-edu.vercel.app', // Frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,  // Allow credentials (cookies)
+    optionsSuccessStatus: 204  // Some legacy browsers (IE11, various SmartTVs) choke on 204
 }));
 app.use(express.json());
 app.use(morgan('dev')); // Log requests to the console
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));// Static folder for serving files (uploaded images, videos, and audio)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Static folder for serving files (uploaded images, videos, and audio)
 app.use(helmet()); // Use Helmet for security
 
 // Connect to database
