@@ -1,9 +1,7 @@
-// backend/routes/securityLogs.js
-
 const express = require('express');
 const router = express.Router();
 const SecurityLog = require('../models/SecurityLog');
-const { authenticateToken } = require('../middleware/authMiddleware');  // Assuming you have an auth middleware
+const { authenticateToken } = require('../middleware/authMiddleware');
 
 // Route to fetch all security logs (accessible to authorized users)
 router.get('/', authenticateToken, async (req, res) => {
