@@ -46,6 +46,8 @@ app.use('/api/users', usersRoutes);
 app.use('/api', authenticateToken, protectedRoutes);
 app.use('/api/categories', authenticateToken, categoryRoutes); // admins and users can access categories
 app.use('/api/instruments', authenticateToken, instrumentRoutes); // Accessible by both users and admins
+//app.use('/api', categoryRoutes);
+//app.use('/api', instrumentRoutes);
 app.use('/api/feedback', feedbacksRoutes);
 app.use('/api/security-logs', securityLogsRoutes);
 
