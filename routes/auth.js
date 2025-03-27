@@ -108,7 +108,7 @@ router.post('/login', validateInput, async (req, res) => {
 
 // Create transporter for sending emails
 const transporter = nodemailer.createTransport({
-    service: 'gmail',  // You can use other services like Outlook, etc.
+    service: 'gmail',
     auth: {
         user: process.env.MAIL_USERNAME,  // From .env
         pass: process.env.MAIL_PASSWORD,  // From .env
@@ -127,7 +127,7 @@ router.post('/forgot-password', async (req, res) => {
 
         // Generate reset token
         const resetToken = jwt.sign({ userId: user._id }, process.env.RESET_TOKEN_SECRET, { expiresIn: '1h' });
-        const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
+        const resetLink = `https://music-edu.vercel.app/reset-password?token=${resetToken}`;//http://localhost:3000
 
         // Send reset email
         await transporter.sendMail({
