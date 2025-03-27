@@ -4,6 +4,7 @@ const cors = require('cors'); // CORS middleware
 const path = require('path'); 
 const helmet = require('helmet'); // Security middleware
 require('dotenv').config();
+const serverless = require('serverless-http'); // Serverless middleware required for vercel deployment
 
 const connectDB = require('./config/db');
 const generateJWTSecret = require('./config/generateSecret'); // Import the secret generation function
@@ -45,8 +46,9 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(morgan('dev')); // Log requests to the console
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Static folder for serving files (uploaded images, videos, and audio)
 app.use(helmet()); // Use Helmet for security
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Static folder for serving files (uploaded images, videos, and audio)
+
 
 // Connect to database
 connectDB();
@@ -68,6 +70,10 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Internal server error' });
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Start server (localhost)
+//const PORT = process.env.PORT || 5000;
+//app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+//Export app for serverless deployment
+module.exports = app;
+module.exports.handler = serverless(app);
