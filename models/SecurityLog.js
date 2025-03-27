@@ -15,7 +15,7 @@ const securityLogSchema = new mongoose.Schema({
     },
     actionDetails: {
         type: String,
-        required: false // Optional, only for detailed logs
+        required: false // This field is optional
     },
     timestamp: {
         type: Date,

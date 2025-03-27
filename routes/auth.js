@@ -1,8 +1,8 @@
 const express = require('express');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs'); // Import bcrypt for hashing
-const { body, validationResult } = require('express-validator'); // Import express-validator for input validation
+const bcrypt = require('bcryptjs');
+const { body, validationResult } = require('express-validator');
 const nodemailer = require('nodemailer');
 const router = express.Router();
 require('dotenv').config();
@@ -149,13 +149,19 @@ router.post('/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
 
     try {
-        const decoded = jwt.verify(token, process.env.RESET_TOKEN_SECRET);
-        const user = await User.findById(decoded.userId);
+        const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: Date.now() },
+        });
+
         if (!user) {
-            return res.status(404).json({ msg: 'User not found' });
+            return res.status(400).json({ msg: 'Invalid or expired token' });
         }
 
         user.password = await bcrypt.hash(newPassword, 10);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
         await user.save();
 
         res.json({ msg: 'Password has been reset successfully' });
@@ -164,5 +170,6 @@ router.post('/reset-password', async (req, res) => {
         res.status(500).json({ msg: 'Failed to reset password. Please try again.' });
     }
 });
+    
 
 module.exports = router;

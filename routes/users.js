@@ -60,7 +60,7 @@ router.get('/', authenticateToken, authorizeAdmin, async (req, res) => {
 
 
 
-// Admin-only route (for example: deleting a user)
+// Admin-only route 
 router.delete('/:id', authenticateToken, authorizeAdmin, async (req, res) => {
     const userId = req.params.id;
 

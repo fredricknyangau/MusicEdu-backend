@@ -19,4 +19,3 @@ exports.addInstrument = async (req, res) => {
   }
 };
 
-// Add additional methods for updating and deleting instruments as needed

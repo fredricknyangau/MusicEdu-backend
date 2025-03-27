@@ -3,7 +3,7 @@ require('dotenv').config();
 
 // Middleware to verify JWT and extract user role
 const authenticateToken = (req, res, next) => {
-    const token = req.header('Authorization')?.split(' ')[1]; // Extract token from header
+    const token = req.header('Authorization')?.split(' ')[1]; 
 
     if (!token) {
         console.log('Token is missing.');
