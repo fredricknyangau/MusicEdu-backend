@@ -31,6 +31,7 @@ app.use(cors({
     origin: 'https://music-edu.vercel.app', // Frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'], // Expose custom headers to the client
     credentials: true,  // Allow credentials (cookies)
     optionsSuccessStatus: 204  // Some legacy browsers (IE11, various SmartTVs) choke on 204
 }));
