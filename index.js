@@ -52,6 +52,8 @@ app.use('/api/users', usersRoutes);
 app.use('/api', authenticateToken, protectedRoutes);
 app.use('/api/categories', authenticateToken, categoryRoutes);
 app.use('/api/instruments', authenticateToken, instrumentRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/instruments', instrumentRoutes);
 app.use('/api/feedback', feedbacksRoutes);
 app.use('/api/security-logs', securityLogsRoutes);
 

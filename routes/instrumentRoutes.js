@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Route to add a new instrument
-router.post('/instruments', upload.fields([
+router.post('/', upload.fields([
     { name: 'image', maxCount: 1 },
     { name: 'video', maxCount: 1 },
     { name: 'audio', maxCount: 1 }
@@ -52,7 +52,7 @@ router.post('/instruments', upload.fields([
 });
 
 // Route to fetch all instruments
-router.get('/instruments', authenticateToken, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
     try {
         const instruments = await Instrument.find().populate('categories');
         res.status(200).json(instruments);
@@ -61,9 +61,8 @@ router.get('/instruments', authenticateToken, async (req, res) => {
     }
 });
 
-
 // Get instrument by ID
-router.get('/instruments/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     try {
       const instrument = await Instrument.findById(req.params.id);
       if (!instrument) {
@@ -75,9 +74,8 @@ router.get('/instruments/:id', async (req, res) => {
     }
 });
 
-
 // Update instrument by ID with multer for handling file uploads
-router.put('/instruments/:id', upload.fields([
+router.put('/:id', upload.fields([
     { name: 'image', maxCount: 1 },
     { name: 'video', maxCount: 1 },
     { name: 'audio', maxCount: 1 }
@@ -113,6 +111,5 @@ router.put('/instruments/:id', upload.fields([
         res.status(500).send('Server error');
     }
 });
-
 
 module.exports = router;
