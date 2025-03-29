@@ -41,12 +41,11 @@ app.use(morgan('dev')); // Log requests to the console
 app.use(helmet()); // Use Helmet for security
 app.use('/uploads', (req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // Allow any origin
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS'); // Allow GET and OPTIONS methods
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow specific headers
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Length, X-Foo, X-Bar'); // Expose custom headers
     next();
 }, express.static(path.join(__dirname, 'uploads')));
-
-
 
 // Connect to database with error handling
 connectDB().catch((err) => {
