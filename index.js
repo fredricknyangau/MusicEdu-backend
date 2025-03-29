@@ -28,24 +28,25 @@ generateResetToken();
 
 // Middleware
 app.use(cors({
-    origin: 'https://music-edu.vercel.app', // Frontend URL
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: '*', // Allow all origins for testing; restrict in production if needed
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'], // Expose custom headers to the client
-    credentials: true,  // Allow credentials (cookies)
-    optionsSuccessStatus: 204  // Some legacy browsers (IE11, various SmartTVs) choke on 204
+    credentials: true,
+    optionsSuccessStatus: 204
 }));
 
 app.use(express.json());
 app.use(morgan('dev')); // Log requests to the console
 app.use(helmet()); // Use Helmet for security
-app.use('/uploads', (req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow any origin
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS'); // Allow GET and OPTIONS methods
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow specific headers
-    res.setHeader('Access-Control-Expose-Headers', 'Content-Length, X-Foo, X-Bar'); // Expose custom headers
-    next();
-}, express.static(path.join(__dirname, 'uploads')));
+
+// Serve static files with proper CORS headers
+app.use('/uploads', cors({
+    origin: '*', // Allow all origins for static files
+    methods: ['GET', 'OPTIONS'], // Allow only GET and OPTIONS for static files
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar']
+}), express.static(path.join(__dirname, 'uploads')));
 
 // Connect to database with error handling
 connectDB().catch((err) => {
