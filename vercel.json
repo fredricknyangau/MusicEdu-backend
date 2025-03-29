@@ -9,11 +9,17 @@
   "routes": [
     {
       "src": "/uploads/(.*)",
-      "dest": "/uploads/$1"
+      "dest": "/uploads/$1",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
     },
     {
       "src": "/(.*)",
       "dest": "index.js"
     }
-  ]
+  ],
+  "static": {
+    "directory": "uploads"
+  }
 }
