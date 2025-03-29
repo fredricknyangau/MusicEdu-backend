@@ -39,7 +39,12 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev')); // Log requests to the console
 app.use(helmet()); // Use Helmet for security
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Static folder for serving uploaded files
+app.use('/uploads', (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    next();
+}, express.static(path.join(__dirname, 'uploads')));
+
 
 // Connect to database with error handling
 connectDB().catch((err) => {
