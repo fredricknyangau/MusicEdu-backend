@@ -1,7 +1,7 @@
 const express = require("express");
 const Instrument = require("../models/Instrument");
 const multer = require("multer");
-const { createBlob } = require("@vercel/blob");
+const cloudinary = require("cloudinary").v2;
 const { authenticateToken, authorizeAdmin } = require("../middleware/authMiddleware");
 require("dotenv").config();
 
@@ -9,13 +9,31 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-const uploadFileToVercelBlob = async (file) => {
-    const blob = await createBlob(`instruments/${file.originalname}`, file.buffer, {
-        contentType: file.mimetype,
-        access: "public",
-        project: process.env.VERCEL_PROJECT_ID, // Include project ID
+// Configure Cloudinary using environment variables
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Function to upload files to Cloudinary
+const uploadFileToCloudinary = async (file, folder) => {
+    return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+            {
+                resource_type: "auto",
+                folder:folder, //Dynamic folder based on the type of file
+            },
+            (error, result) => {
+             if (error) {
+                console.error("Error uploading file to Cloudinary:", error);
+                reject(error);
+             } else {
+                resolve(result.secure_url); // Return the secure URL of the uploaded file
+             }  
+            }
+        ).end(file.buffer);
     });
-    return blob.url;
 };
 
 // Route to add a new instrument
@@ -33,9 +51,9 @@ router.post(
             const { name, description, historicalBackground, categories } = req.body;
             const parsedCategories = categories ? JSON.parse(categories) : [];
 
-            const image = req.files["image"] ? await uploadFileToVercelBlob(req.files["image"][0]) : null;
-            const video = req.files["video"] ? await uploadFileToVercelBlob(req.files["video"][0]) : null;
-            const audio = req.files["audio"] ? await uploadFileToVercelBlob(req.files["audio"][0]) : null;
+            const image = req.files["image"] ? await uploadFileToCloudinary(req.files["image"][0], "instruments/images") : null;
+            const video = req.files["video"] ? await uploadFileToCloudinary(req.files["video"][0], "instruments/videos") : null;
+            const audio = req.files["audio"] ? await uploadFileToCloudinary(req.files["audio"][0], "instruments/audios") : null;
 
             const newInstrument = new Instrument({
                 name,
@@ -100,9 +118,9 @@ router.put(
                 categories: req.body.categories ? JSON.parse(req.body.categories) : [],
             };
 
-            if (req.files["image"]) updateData.image = await uploadFileToVercelBlob(req.files["image"][0]);
-            if (req.files["video"]) updateData.video = await uploadFileToVercelBlob(req.files["video"][0]);
-            if (req.files["audio"]) updateData.audio = await uploadFileToVercelBlob(req.files["audio"][0]);
+            if (req.files["image"]) updateData.image = await uploadFileToCloudinary(req.files["image"][0]);
+            if (req.files["video"]) updateData.video = await uploadFileToCloudinary(req.files["video"][0]);
+            if (req.files["audio"]) updateData.audio = await uploadFileToCloudinary(req.files["audio"][0]);
 
             const instrument = await Instrument.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
