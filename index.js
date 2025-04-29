@@ -9,8 +9,6 @@ const connectDB = require("./config/db");
 const generateJWTSecret = require("./config/generateSecret");
 const generateResetToken = require("./config/generateResetToken");
 
-app.options('*', cors()); // Preflight all routes
-
 
 const authRoutes = require("./routes/auth");
 const protectedRoutes = require("./routes/protectedRoutes");
