@@ -28,23 +28,42 @@ generateResetToken();
 // Middleware
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:3000", "https://music-edu.vercel.app", "https://music-edu-backend.onrender.com"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: true,
     optionsSuccessStatus: 204,
+    preflightContinue: false,
+    maxAge: 86400 // 24 hours
   })
 );
+
+// Add CORS headers to all responses
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(helmet());
 
 // Serve static files with proper CORS headers
-app.use("/uploads", cors(), express.static(path.join(__dirname, "uploads")));
+app.use(
+  "/uploads",
+  cors({
+    origin: "*",
+    methods: ["GET", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Content-Length", "X-Foo", "X-Bar"],
+  }),
+  express.static(path.join(__dirname, "uploads"))
+);
 
-// Connect to database
+// Connect to DB
 connectDB().catch((err) => {
   console.error("Database connection failed:", err);
   process.exit(1);
@@ -56,24 +75,16 @@ app.use("/api/users", usersRoutes);
 app.use("/api", authenticateToken, protectedRoutes);
 app.use("/api/categories", authenticateToken, categoryRoutes);
 app.use("/api/instruments", authenticateToken, instrumentRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/instruments", instrumentRoutes);
 app.use("/api/feedback", feedbacksRoutes);
 app.use("/api/security-logs", securityLogsRoutes);
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: "Internal server error" });
-});
-
-// Health check
+// Health check route
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Server is running" });
 });
 
-// Start server for Render
-const PORT = process.env.PORT || 3000;
+// Start the server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
