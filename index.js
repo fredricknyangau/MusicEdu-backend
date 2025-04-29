@@ -9,6 +9,9 @@ const connectDB = require("./config/db");
 const generateJWTSecret = require("./config/generateSecret");
 const generateResetToken = require("./config/generateResetToken");
 
+app.options('*', cors()); // Preflight all routes
+
+
 const authRoutes = require("./routes/auth");
 const protectedRoutes = require("./routes/protectedRoutes");
 const usersRoutes = require("./routes/users");
@@ -28,7 +31,7 @@ generateResetToken();
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://music-edu.vercel.app", "https://music-edu-backend.onrender.com"],
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: true,
@@ -37,15 +40,6 @@ app.use(
     maxAge: 86400 // 24 hours
   })
 );
-
-// Add CORS headers to all responses
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  next();
-});
 
 app.use(express.json());
 app.use(morgan("dev"));
