@@ -72,7 +72,6 @@ connectDB().catch((err) => {
 
 // Routes
 app.use("/api", authRoutes);
-app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/protected", authenticateToken, protectedRoutes);
 app.use("/api/categories", authenticateToken, categoryRoutes);
