@@ -9,7 +9,6 @@ const connectDB = require("./config/db");
 const generateJWTSecret = require("./config/generateSecret");
 const generateResetToken = require("./config/generateResetToken");
 
-
 const authRoutes = require("./routes/auth");
 const protectedRoutes = require("./routes/protectedRoutes");
 const usersRoutes = require("./routes/users");
@@ -29,13 +28,23 @@ generateResetToken();
 // Middleware
 app.use(
   cors({
-    origin: "*",
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "http://localhost:3000", // Localhost for development
+        "https://music-edu.vercel.app", // Production URL
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true); // Allow the request
+      } else {
+        callback(new Error("Not allowed by CORS")); // Block the request
+      }
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     credentials: true,
     optionsSuccessStatus: 204,
     preflightContinue: false,
-    maxAge: 86400 // 24 hours
+    maxAge: 86400, // 24 hours
   })
 );
 
