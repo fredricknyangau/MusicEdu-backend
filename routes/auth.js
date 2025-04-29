@@ -43,17 +43,28 @@ const sendEmail = async (to, subject, text) => {
 };
 
 // Reusable validation rules
-const validateIdentifier = body("identifier")
+const validateEmail = body("email")
   .notEmpty()
-  .withMessage("Identifier is required")
+  .withMessage("Email is required")
+  .isEmail()
+  .withMessage("Please provide a valid email address")
+  .trim();
+
+const validateUsername = body("username")
+  .notEmpty()
+  .withMessage("Username is required")
   .isLength({ min: 3 })
-  .withMessage("Identifier must be at least 3 characters.")
-  .custom((value) => {
-    if (!/\S+@\S+\.\S+/.test(value) && value.length < 3) {
-      throw new Error("Please provide a valid email or username");
-    }
-    return true;
-  })
+  .withMessage("Username must be at least 3 characters")
+  .trim();
+
+const validateName = body("firstName")
+  .notEmpty()
+  .withMessage("First name is required")
+  .trim();
+
+const validateLastName = body("lastName")
+  .notEmpty()
+  .withMessage("Last name is required")
   .trim();
 
 const validatePassword = body("password")
@@ -92,7 +103,14 @@ const loginLimiter = rateLimit({
 // Sign Up Route
 router.post(
   "/signup",
-  [validateIdentifier, validatePassword, handleValidationErrors],
+  [
+    validateEmail,
+    validateUsername,
+    validateName,
+    validateLastName,
+    validatePassword,
+    handleValidationErrors
+  ],
   async (req, res) => {
     const { firstName, lastName, email, username, password, role } = req.body;
 
@@ -144,13 +162,13 @@ router.post(
 router.post(
   "/login",
   loginLimiter,
-  [validateIdentifier, validatePassword, handleValidationErrors],
+  [validateEmail, validatePassword, handleValidationErrors],
   async (req, res) => {
-    const { identifier, password } = req.body;
+    const { email, password } = req.body;
 
     try {
       const user = await User.findOne({
-        $or: [{ email: identifier }, { username: identifier }],
+        $or: [{ email: email }, { username: email }],
       });
 
       if (!user) {
@@ -188,11 +206,11 @@ router.post(
 
 // Forgot Password Route
 router.post("/forgot-password", async (req, res) => {
-  const { identifier } = req.body;
+  const { email } = req.body;
 
   try {
     const user = await User.findOne({
-      $or: [{ email: identifier }, { username: identifier }],
+      $or: [{ email: email }, { username: email }],
     });
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
