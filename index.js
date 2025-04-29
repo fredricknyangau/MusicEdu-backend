@@ -73,7 +73,7 @@ connectDB().catch((err) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
-app.use("/api", authenticateToken, protectedRoutes);
+app.use("/api/protected", authenticateToken, protectedRoutes);
 app.use("/api/categories", authenticateToken, categoryRoutes);
 app.use("/api/instruments", authenticateToken, instrumentRoutes);
 app.use("/api/feedback", feedbacksRoutes);
