@@ -20,8 +20,7 @@ const handleValidationErrors = (req, res, next) => {
 router.post(
   "/signup",
   [
-    body("firstName").notEmpty().withMessage("First name is required"),
-    body("lastName").notEmpty().withMessage("Last name is required"),
+    body("fullName").notEmpty().withMessage("Full name is required"),
     body("email")
       .notEmpty()
       .withMessage("Email is required")
@@ -48,19 +47,33 @@ router.post(
     handleValidationErrors,
   ],
   async (req, res) => {
-    const { firstName, lastName, email, username, password } = req.body;
+    const { fullName, email, username, password } = req.body;
 
     try {
       const existingUser = await User.findOne({ $or: [{ email }, { username }] });
       if (existingUser) {
-        return res.status(400).json({ msg: "User already exists" });
+        const duplicateField =
+          existingUser.email === email ? "email" : "username";
+        return res.status(400).json({
+          msg: `${
+            duplicateField === "email" ? "Email" : "Username"
+          } already exists`,
+          errors: [
+            {
+              field: duplicateField,
+              message: `${
+                duplicateField.charAt(0).toUpperCase() + duplicateField.slice(1)
+              } already in use`,
+            },
+          ],
+        });
       }
+
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const newUser = new User({
-        firstName,
-        lastName,
+        fullName,
         email,
         username,
         password: hashedPassword,
@@ -112,10 +125,10 @@ router.post(
         token,
         user: {
           id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
+          fullName: user.fullName,
           email: user.email,
           role: user.role,
+          lastLogin: new Date(),
         },
       });
     } catch (error) {

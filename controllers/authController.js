@@ -8,34 +8,79 @@ const generateToken = (user) => {
 };
 
 exports.register = async (req, res) => {
-    try {
-        const { fullName, email, username, password } = req.body;
+  try {
+    const { fullName, email, username, password } = req.body;
 
-        // Check if the email or username already exists
-        const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-        if (existingUser) {
-            return res.status(400).json({ msg: 'Email or Username already exists' });
-        }
-
-        // Hash the password before saving it to the database
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ fullName, email, username, password: hashedPassword });
-        await newUser.save();
-
-        // Create JWT token
-        const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-
-        // Respond with the user data and the token
-        res.status(201).json({
-            msg: 'User registered successfully',
-            token,
-            user: { id: newUser._id, fullName: newUser.fullName, email: newUser.email }
-        });
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ msg: 'Server error', error: error.message });
+    // Check if the email or username already exists
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return res.status(400).json({
+        msg: "Email or Username already exists",
+        errors: [
+          {
+            field: "emailOrUsername",
+            message: "Email or Username already exists",
+          },
+        ],
+      });
     }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      fullName,
+      email,
+      username,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    // Generate token
+    const token = jwt.sign(
+      { id: newUser._id, role: newUser.role },
+      process.env.JWT_SECRET
+    );
+
+    res.status(201).json({
+      msg: "User registered successfully",
+      token,
+      user: {
+        id: newUser._id,
+        fullName: newUser.fullName,
+        email: newUser.email,
+      },
+    });
+  } catch (error) {
+    console.error("Register Error:", error);
+
+    if (error.name === "ValidationError") {
+      const errors = Object.values(error.errors).map((err) => ({
+        field: err.path,
+        message: err.message,
+      }));
+      return res.status(400).json({ msg: "Validation error", errors });
+    }
+
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyValue)[0];
+      return res.status(400).json({
+        msg: "Duplicate field error",
+        errors: [
+          {
+            field,
+            message: `${
+              field.charAt(0).toUpperCase() + field.slice(1)
+            } already exists`,
+          },
+        ],
+      });
+    }
+
+    res.status(500).json({ msg: "Server error", error: error.message });
+  }
 };
+
 
 exports.login = async (req, res) => {
     try {
