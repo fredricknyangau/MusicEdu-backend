@@ -23,7 +23,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
 //Update Profile
 router.put('/profile', authenticateToken, async (req, res) => {
     try {
-        const { firstName, lastName, email, username } = req.body; // Fields to update
+        const { fullName, email, username } = req.body; // Fields to update
 
         // Find the user by ID from the token
         const user = await User.findById(req.user.userId);
@@ -33,8 +33,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
         }
 
         // Update the user fields (you can add more fields here)
-        user.firstName = firstName || user.firstName;
-        user.lastName = lastName || user.lastName;
+        user.fullName = fullName || user.fullName;
         user.email = email || user.email;
         user.username = username || user.username; // Update username
 
