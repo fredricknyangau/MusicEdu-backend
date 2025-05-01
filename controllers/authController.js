@@ -9,7 +9,7 @@ const generateToken = (user) => {
 
 exports.register = async (req, res) => {
     try {
-        const { firstName, lastName, email, username, password } = req.body;
+        const { fullName, email, username, password } = req.body;
 
         // Check if the email or username already exists
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -19,7 +19,7 @@ exports.register = async (req, res) => {
 
         // Hash the password before saving it to the database
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ firstName, lastName, email, username, password: hashedPassword });
+        const newUser = new User({ fullName, email, username, password: hashedPassword });
         await newUser.save();
 
         // Create JWT token
@@ -29,7 +29,7 @@ exports.register = async (req, res) => {
         res.status(201).json({
             msg: 'User registered successfully',
             token,
-            user: { id: newUser._id, firstName: newUser.firstName, lastName: newUser.lastName, email: newUser.email }
+            user: { id: newUser._id, fullName: newUser.fullName, email: newUser.email }
         });
     } catch (error) {
         console.error(error.message);
@@ -60,7 +60,7 @@ exports.login = async (req, res) => {
         res.status(200).json({
             msg: 'Logged in successfully',
             token,
-            user: { id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email }
+            user: { id: user._id, fullName: user.fullName, email: user.email }
         });
     } catch (error) {
         console.error(error.message);
