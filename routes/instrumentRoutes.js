@@ -182,4 +182,22 @@ router.put(
   }
 );
 
+// Delete an instrument
+router.delete("/:id", authenticateToken, authorizeAdmin, async (req, res) => {
+  try {
+    const instrument = await Instrument.findByIdAndDelete(req.params.id);
+
+    if (!instrument) {
+      return res.status(404).json({ message: "Instrument not found" });
+    }
+
+    res.status(200).json({ message: "Instrument deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting instrument:", error);
+    res
+      .status(500)
+      .json({ message: "Error deleting instrument", error: error.message });
+  }
+});
+
 module.exports = router;
