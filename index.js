@@ -28,23 +28,7 @@ generateResetToken();
 // Middleware
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) {
-        return callback(null, true);
-      }
-
-      const allowedOrigins = [
-        "http://localhost:3000", // Localhost for development
-        "https://music-edu.vercel.app", // Production URL
-      ];
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: "*", // Allow all origins during development
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: [
       "Content-Type",
@@ -62,10 +46,7 @@ app.use(
 
 // Add CORS headers for all responses
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (origin) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
+  res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, OPTIONS, PATCH"
