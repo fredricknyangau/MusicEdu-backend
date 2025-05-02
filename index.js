@@ -3,11 +3,13 @@ const morgan = require("morgan");
 const cors = require("cors");
 const path = require("path");
 const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
 const generateJWTSecret = require("./config/generateSecret");
 const generateResetToken = require("./config/generateResetToken");
+const errorHandler = require("./middleware/errorHandler");
 
 const authRoutes = require("./routes/auth");
 const protectedRoutes = require("./routes/protectedRoutes");
@@ -102,6 +104,16 @@ connectDB().catch((err) => {
   process.exit(1);
 });
 
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later",
+});
+
+// Apply rate limiting to all routes
+app.use(limiter);
+
 // Routes
 app.use("/api", authRoutes);
 app.use("/api/users", usersRoutes);
@@ -115,6 +127,9 @@ app.use("/api/security-logs", securityLogsRoutes);
 app.get("/", (req, res) => {
   res.status(200).json({ message: "Server is running" });
 });
+
+// Error handling middleware (should be the last middleware)
+app.use(errorHandler);
 
 // Start the server
 const PORT = process.env.PORT || 5000;

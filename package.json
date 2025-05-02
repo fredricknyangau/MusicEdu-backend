@@ -4,8 +4,10 @@
   "description": "African Music Archive is a platform that allows users to upload, share, and discover African music. It provides a user-friendly interface for artists to showcase their work and for listeners to explore a diverse range of music from across the continent.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "test": "jest",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -29,6 +31,12 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.10.0",
     "path": "^0.12.7",
-    "serverless-http": "^3.2.0"
+    "serverless-http": "^3.2.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.3"
   }
 }
