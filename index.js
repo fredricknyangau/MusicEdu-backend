@@ -29,24 +29,61 @@ generateResetToken();
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+
       const allowedOrigins = [
         "http://localhost:3000", // Localhost for development
         "https://music-edu.vercel.app", // Production URL
       ];
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true); // Allow the request
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS")); // Block the request
+        callback(new Error("Not allowed by CORS"));
       }
     },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+    ],
+    exposedHeaders: ["Content-Range", "X-Content-Range"],
     credentials: true,
-    optionsSuccessStatus: 204,
+    optionsSuccessStatus: 200,
     preflightContinue: false,
     maxAge: 86400, // 24 hours
   })
 );
+
+// Add CORS headers for all responses
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With, Accept"
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Expose-Headers", "Content-Range, X-Content-Range");
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  next();
+});
 
 app.use(express.json());
 app.use(morgan("dev"));
