@@ -138,6 +138,56 @@ router.post(
   }
 );
 
+// Google Login route
+router.post("/google", async (req, res) => {
+  const { email, name, picture, provider } = req.body;
+
+  if (!email || !name || !provider) {
+    return res.status(400).json({ msg: "Missing required Google user data." });
+  }
+
+  try {
+    let user = await User.findOne({ email });
+
+    // Create user if not existing
+    if (!user) {
+      user = new User({
+        fullName: name,
+        email,
+        username: email.split("@")[0], // use email prefix as default username
+        picture,
+        provider,
+        role: "user", // or "admin" depending on your logic
+      });
+
+      await user.save();
+    }
+
+    // Generate token
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({
+      msg: "Google login successful",
+      token,
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        picture: user.picture,
+      },
+    });
+  } catch (error) {
+    console.error("Error during Google login:", error);
+    res.status(500).json({ msg: "Server error", error: error.message });
+  }
+});
+
+
 // Forgot password route
 router.post(
   "/forgot-password",
